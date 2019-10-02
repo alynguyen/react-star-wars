@@ -1,26 +1,52 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { Component } from 'react';
 import './App.css';
+import { Route, Switch } from 'react-router-dom';
+import { getAllStarships } from './services/sw-api';
+import StarshipPage from './pages/StarshipPage';
+import Starship from './components/Starship';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends Component {
+  constructor() {
+    super();
+    this.state = {
+      starships: [],
+      pilots: [],
+    }
+  }
+
+  async componentDidMount() {
+    const shipData = await getAllStarships();
+    this.setState({
+      starships: shipData.results,
+    });
+  }
+
+  upPilots = (p) => {
+    this.setState({pilots: p})
+  }
+
+  render() {
+    return (
+      <div>
+        <header className="App-header">STAR WARS STARSHIPS</header>
+        <Switch>
+        <Route exact path="/" render = { props => 
+        <Starship
+          starships={this.state.starships}
+        />
+        }/>
+        <Route path="/:id" render={ props =>
+        <StarshipPage
+          {...props}
+          starship={this.state.starships[props.match.params.id]}
+          upPilots={this.upPilots}
+          pilots={this.state.pilots}
+        />
+        } />
+        </Switch>
+      </div>
+    );
+  }
 }
 
 export default App;
